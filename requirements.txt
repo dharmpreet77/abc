@@ -1,4 +1,4 @@
 groq==0.9.0
 streamlit==1.37.0
 speechrecognition
-PyAudio==0.2.11
+https://files.pythonhosted.org/packages/8a/bc/2f92cf84a8a50726c7d048c22d3b6174ed9b11f89cc17f84c3f5b9b5c0fa/PyAudio-0.2.13-cp39-cp39-win_amd64.whl
