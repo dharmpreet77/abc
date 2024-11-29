@@ -3,6 +3,8 @@ import json
 import streamlit as st
 from groq import Groq
 import speech_recognition as sr
+import sounddevice as sd
+import numpy as np
 
 
 # Streamlit page configuration
@@ -39,30 +41,30 @@ st.markdown(
 st.markdown(custom_css, unsafe_allow_html=True)
 
 
+
 def record_audio_to_text():
     recognizer = sr.Recognizer()
-    with sr.Microphone() as source:
-        # Create a placeholder for the "Listening..." message
-        message_placeholder = st.empty()
-        message_placeholder.info("Listening... Speak now!")
-        try:
-            # Increase timeout and add a phrase_time_limit
-            audio_data = recognizer.listen(source, timeout=10, phrase_time_limit=15)
-            message_placeholder.empty()  # Remove the "Listening..." message
-            return recognizer.recognize_google(audio_data)
-        except sr.WaitTimeoutError:
-            message_placeholder.empty()
-            st.error("Listening timed out. Please speak louder or check your microphone settings.")
-        except sr.UnknownValueError:
-            message_placeholder.empty()
-            st.error("Sorry, could not understand the audio. Please try again.")
-        except sr.RequestError as e:
-            message_placeholder.empty()
-            st.error(f"Could not request results; {e}")
-        except Exception as e:
-            message_placeholder.empty()
-            st.error(f"An error occurred: {e}")
-        return ""
+    duration = 5  # Set the duration for recording in seconds
+    fs = 44100  # Sampling frequency
+
+    st.info("Listening... Speak now!")
+    try:
+        # Record audio using sounddevice
+        st.info("Recording audio...")
+        audio = sd.rec(int(duration * fs), samplerate=fs, channels=1, dtype='int16')
+        sd.wait()  # Wait until recording is finished
+
+        # Convert the recorded audio to an AudioData object
+        audio_data = sr.AudioData(audio.tobytes(), fs, 2)
+        st.info("Processing audio...")
+        return recognizer.recognize_google(audio_data)
+    except sr.UnknownValueError:
+        st.error("Sorry, I could not understand the audio.")
+    except sr.RequestError as e:
+        st.error(f"Could not request results from Google Speech Recognition; {e}")
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
+    return ""
 
 # App title
 st.title("💇‍♀️ Amber Salon - ChatBot")
